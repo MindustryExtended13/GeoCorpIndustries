@@ -1,11 +1,11 @@
 {
-  "displayName": "Java Mod Template",
-  "name": "example-java-mod",
-  "author": "You",
-  "main": "example.ExampleJavaMod",
-  "description": "A Mindustry Java mod template.",
+  "displayName": "GeoCorp Industries",
+  "name": "gmod",
+  "author": "TheEE145",
+  "main": "gmod.GeoCorp",
+  "description": "A Mindustry Java mod that adds serpulo industry.",
   "version": 1.0,
   "minGameVersion": 140,
   "java": true,
-  "repo": "User/RepoName"
+  "repo": "MindustryExtended13/GeoCorpIndustries"
 }

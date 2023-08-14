@@ -1,11 +1,19 @@
-apply plugin: "java"
+apply plugin: 'java'
+apply plugin: 'maven-publish'
 
 targetCompatibility = 8
 sourceCompatibility = JavaVersion.VERSION_16
 
-sourceSets.main {
-    java.srcDirs = ["src"]
-    resources.srcDirs = ["assets"]
+sourceSets {
+    main {
+        java.srcDirs = ["src"]
+        resources.srcDirs = ["assets"]
+    }
+
+    test {
+        java.srcDirs = []
+        resources.srcDirs = []
+    }
 }
 
 ext {
@@ -23,83 +31,49 @@ ext {
     }
 }
 
-//java 8 backwards compatibility flag
-allprojects {
-    group = "io.user.modname"
-    version '1.0'
+java {
+    withSourcesJar()
+    withJavadocJar()
+}
 
-    tasks.withType(JavaCompile){
+publishing {
+    publications {
+        maven(MavenPublication) {
+            groupId project.group
+            artifactId project.name
+            version project.version
+            from components.java
+        }
+    }
+}
+
+repositories {
+    mavenCentral()
+
+    maven {
+        url 'https://maven.xpdustry.com/anuken'
+    }
+
+    maven {
+        url 'https://www.jitpack.io'
+    }
+}
+
+dependencies {
+    compileOnly 'org.jetbrains:annotations:23.0.0'
+}
+
+tasks.withType(JavaCompile).tap {
+    configureEach {
         options.compilerArgs.addAll(['--release', '8'])
     }
 }
 
-subprojects {
-    apply plugin: 'java'
-    apply plugin: 'maven-publish'
-
-    sourceSets.main {
-        java.srcDirs = ["src"]
-        resources.srcDirs = []
-    }
-
-    sourceCompatibility = 1.8 // java 8
-    targetCompatibility = 1.8
-
-    //jitpack modules publish (for example core, integration)
-    //you can remove this if need to remove
-    java {
-        withSourcesJar()
-        withJavadocJar()
-    }
-
-    publishing {
-        publications {
-            maven(MavenPublication) {
-                groupId project.group
-                artifactId project.name
-                version project.version
-                from components.java
-            }
-        }
-    }
-}
-
-allprojects {
-    apply plugin: "java"
-
-    sourceSets.test {
-        java.srcDirs = []
-        resources.srcDirs = []
-    }
-
-    repositories {
-        mavenCentral()
-
-        maven {
-            url 'https://maven.xpdustry.com/anuken'
-        }
-
-        maven {
-            url 'https://www.jitpack.io'
-        }
-    }
-
-    dependencies {
-        compileOnly 'org.jetbrains:annotations:23.0.0'
-    }
-
-    tasks.withType(JavaCompile).tap {
-        configureEach {
-            options.compilerArgs.addAll(['--release', '8'])
-        }
-    }
-
-    //force arc version
-    configurations.configureEach {
-        resolutionStrategy.eachDependency { details ->
-            if(details.requested.group == 'com.github.Anuken.Arc') {
-                details.useVersion "$mindustryVersion"
-            }
+//force arc version
+configurations.configureEach {
+    resolutionStrategy.eachDependency { details ->
+        if(details.requested.group == 'com.github.Anuken.Arc') {
+            details.useVersion "$mindustryVersion"
         }
     }
 }
@@ -111,12 +85,9 @@ dependencies {
     compileOnly 'org.jetbrains:annotations:23.0.0'
     annotationProcessor "com.github.Anuken:jabel:$jabelVersion"
 
-    //core & integration (not optimal and core, integration module can be removed)
-    implementation project(":core")
-    implementation project(":integration")
-
     //ME13 components
     //to implement use "implementation modCore(':module')"
+    implementation modCore(':logger')
 }
 
 //force arc version
@@ -209,19 +180,3 @@ task zipJar(type: Jar) {
 
     dependsOn 'jar'
 }
-
-project(":core") {
-    dependencies {
-        annotationProcessor "com.github.Anuken:jabel:$jabelVersion"
-        compileOnly "com.github.Anuken.Arc:arc-core:$mindustryVersion"
-        compileOnly "com.github.Anuken.MindustryJitpack:core:$mindustryVersion"
-    }
-}
-
-//project(":integration") {
-//    dependencies {
-//        annotationProcessor "com.github.Anuken:jabel:$jabelVersion"
-//        compileOnly "com.github.Anuken.Arc:arc-core:$mindustryVersion"
-//        compileOnly "com.github.Anuken.MindustryJitpack:core:$mindustryVersion"
-//    }
-//}
