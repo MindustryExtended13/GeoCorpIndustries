@@ -9,6 +9,7 @@ import gmod.content.GeoCategories;
 import gmod.content.GeoParts;
 import gmod.entity.AbstractUnitEntity;
 import gmod.parts.PartEntity;
+import gmod.parts.PartEntityRegister;
 import gmod.parts.PartsCategory;
 import gmod.util.GeoGroups;
 import gmod.world.block.GeoBlock;

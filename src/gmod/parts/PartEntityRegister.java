@@ -9,7 +9,7 @@ public class PartEntityRegister {
     private static final ObjectMap<Integer, Prov<PartEntity>> map = new ObjectMap<>();
     public static int id = 0;
 
-    public static void register(Prov<PartEntity> partEntityProv, Class<PartEntity> cl) {
+    public static void register(Prov<PartEntity> partEntityProv, Class<? extends PartEntity> cl) {
         map.put(id, GeoCorp.returnNonNull(partEntityProv, PartEntity::new));
         idMap.put(GeoCorp.requireNonNull(cl), id);
         id++;

@@ -24,8 +24,15 @@ public class PartEntity implements Position {
         return rotation * 90 - 90;
     }
 
+    public int drawRotation() {
+        return rotation + 1 % 4;
+    }
+
     public boolean isEditor() {
         return entity == null;
+    }
+
+    public void updateStats() {
     }
 
     public void update() {
@@ -69,17 +76,25 @@ public class PartEntity implements Position {
         writes.i(y);
     }
 
+    public float width() {
+        return part.width * Part.PART_TILESIZE;
+    }
+
+    public float height() {
+        return part.height * Part.PART_TILESIZE;
+    }
+
     public Vec2 relativePosition() {
         return isEditor() ? new Vec2(getX(), getY()) : entity.relative(this);
     }
 
     @Override
     public float getX() {
-        return x * Part.PART_TILESIZE + (part.width/2f) * Part.PART_TILESIZE;
+        return x * Part.PART_TILESIZE + width() / 2;
     }
 
     @Override
     public float getY() {
-        return y * Part.PART_TILESIZE + (part.height/2f) * Part.PART_TILESIZE;
+        return y * Part.PART_TILESIZE + height() / 2;
     }
 }
