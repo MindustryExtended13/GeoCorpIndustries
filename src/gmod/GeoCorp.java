@@ -1,11 +1,25 @@
 package gmod;
 
 import arc.Core;
+import arc.Events;
 import arc.graphics.g2d.TextureRegion;
+import arc.struct.Seq;
+import gmod.content.GeoBlocks;
+import gmod.content.GeoCategories;
+import gmod.content.GeoParts;
+import gmod.entity.AbstractUnitEntity;
+import gmod.parts.PartEntity;
+import gmod.parts.PartsCategory;
+import gmod.util.GeoGroups;
+import gmod.world.block.GeoBlock;
 import me13.core.logger.ILogger;
 import me13.core.logger.LoggerFactory;
+import me13.core.units.XeonUnits;
+import mindustry.game.EventType;
+import mindustry.game.Team;
 import mindustry.mod.Mods.LoadedMod;
 import mindustry.mod.Mod;
+import mindustry.type.UnitType;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
@@ -17,26 +31,47 @@ public class GeoCorp extends Mod {
     public static final String MOD_AUTHOR = "[black]The[red]EE[gray]145";
     public static final String MOD_ID = "gmod";
     public static LoadedMod instance;
-
-    public void initInstance() {
-        instance = mods.getMod(GeoCorp.class);
-    }
+    public static UnitType abstractc;
 
     @Override
     public void loadContent() {
-        initInstance();
+        LOGGER.info("Starting load content");
+        instance = requireNonNull(mods.getMod(GeoCorp.class));
+        GeoCategories.load();
+        GeoParts.load();
+        GeoBlocks.load();
+        LOGGER.info("Loading abstractc");
+        XeonUnits.add(AbstractUnitEntity.class, AbstractUnitEntity::new);
+        abstractc = new UnitType("abstractc") {{
+            constructor = AbstractUnitEntity::new;
+            flying = true;
+        }};
     }
 
     @Override
     public void init() {
-        if(instance == null) {
-            LOGGER.err("Unknown reason why but [accent]instance[] is null, re-init...");
-            initInstance();
-        }
-
-        requireNonNull(instance);
+        LOGGER.info("Mod init");
         instance.meta.displayName = MOD_NAME;
         instance.meta.author = MOD_AUTHOR;
+
+        on(EventType.ClientLoadEvent.class, () -> {
+            GeoGroups.PARTS_CATEGORIES.init();
+            GeoGroups.PARTS.init();
+            GeoGroups.PARTS_CATEGORIES.load();
+            GeoGroups.PARTS.load();
+            GeoGroups.PARTS_CATEGORIES.freeze();
+            GeoGroups.PARTS.freeze();
+        });
+    }
+
+    public static AbstractUnitEntity construct(@NotNull Seq<PartEntity> entities, Team team, float x, float y) {
+        AbstractUnitEntity abstractUnit = (AbstractUnitEntity) abstractc.spawn(team, x, y);
+        entities.each(abstractUnit::addPart);
+        return abstractUnit;
+    }
+
+    public static<T> void on(Class<T> cl, Runnable runnable) {
+        Events.on(cl, ignored -> runnable.run());
     }
 
     public static String bundle(String name) {

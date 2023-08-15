@@ -24,7 +24,7 @@ ext {
 
     modCore = {String name ->
         if(name.startsWith(":")) {
-            name = name.substring(1);
+            name = name.substring(1)
         }
 
         return "com.github.MindustryExtended13.Me13Core:$name:533faaf615"
@@ -87,7 +87,9 @@ dependencies {
 
     //ME13 components
     //to implement use "implementation modCore(':module')"
+    implementation modCore(':block')
     implementation modCore(':logger')
+    implementation modCore(':units')
 }
 
 //force arc version
@@ -105,7 +107,7 @@ task jarAndroid{
     doLast{
         if(!sdkRoot || !new File(sdkRoot).exists()) throw new GradleException(
                 "No valid Android SDK found. Ensure that ANDROID_HOME is set to your Android SDK directory."
-        );
+        )
 
         def platformRoot = new File("$sdkRoot/platforms/").listFiles().sort().reverse().find{
             f -> new File(f, "android.jar").exists()
@@ -116,7 +118,6 @@ task jarAndroid{
         )
 
 
-        //collect dependencies needed for desugaring
         def dependencies = (configurations.compileClasspath.asList() +
                 configurations.runtimeClasspath.asList() + [new File(platformRoot, "android.jar")]).collect{
             "--classpath $it.path"}.join(" ")
