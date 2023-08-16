@@ -43,6 +43,11 @@ public class PartsEditorDialog extends BaseDialog {
                     }).tooltip("Place mod");
                     button.button(Icon.cancel, Styles.cleari, () -> {
                     }).tooltip("Delete mode");
+                    button.button(Icon.rotate, Styles.cleari, () -> {
+                        if(element.hasCurrent()) {
+                            element.current.rotation = (element.current.rotation + 1) % 4;
+                        }
+                    }).tooltip("Rotate part");
                     button.row();
                     button.button(new TextureRegionDrawable(GeoCorp.asset("mirror-x")), Styles.clearTogglei,
                             () -> {}).tooltip("Mirror X");

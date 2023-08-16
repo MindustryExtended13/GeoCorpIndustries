@@ -26,11 +26,15 @@ public class PartBuildPlan {
         return part.height * Part.PART_TILESIZE;
     }
 
+    public boolean is2() {
+        return rotation == 1 || rotation == 2;
+    }
+
     public float drawx() {
-        return x * Part.PART_TILESIZE + width() / 2 - Part.PART_TILESIZE / 2f;
+        return x * Part.PART_TILESIZE + (is2() ? height() / 2 : width() / 2) - Part.PART_TILESIZE / 2f;
     }
 
     public float drawy() {
-        return y * Part.PART_TILESIZE + height() / 2 - Part.PART_TILESIZE / 2f;
+        return y * Part.PART_TILESIZE + (!is2() ? height() / 2 : width() / 2) - Part.PART_TILESIZE / 2f;
     }
 }

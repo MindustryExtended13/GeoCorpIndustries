@@ -10,6 +10,7 @@ import gmod.GeoCorp;
 import gmod.entity.AbstractUnitEntity;
 import gmod.util.EnumMirror;
 import gmod.util.GeoGroups;
+import me13.core.block.BlockAngles;
 import org.jetbrains.annotations.NotNull;
 
 public class PartEntity implements Position {
@@ -20,12 +21,16 @@ public class PartEntity implements Position {
     public int x, y;
     public Part part;
 
+    public boolean is2() {
+        return rotation == 1 || rotation == 2;
+    }
+
     public float drawRot() {
         return rotation * 90;
     }
 
     public int drawRotation() {
-        return rotation + 1 % 4;
+        return (rotation + 1) % 4;
     }
 
     public boolean isEditor() {
@@ -91,11 +96,11 @@ public class PartEntity implements Position {
 
     @Override
     public float getX() {
-        return x * Part.PART_TILESIZE + width() / 2;
+        return x * Part.PART_TILESIZE + (is2() ? height() / 2 : width() / 2);
     }
 
     @Override
     public float getY() {
-        return y * Part.PART_TILESIZE + height() / 2;
+        return y * Part.PART_TILESIZE + (!is2() ? height() / 2 : width() / 2);
     }
 }
