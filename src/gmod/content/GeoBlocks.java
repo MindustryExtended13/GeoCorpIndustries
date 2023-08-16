@@ -12,6 +12,7 @@ public class GeoBlocks {
     public static void load() {
         creativeConstructor = new SpaceShipConstructor("creative-constructor") {{
             requirements(Category.effect, BuildVisibility.sandboxOnly, ItemStack.empty);
+            size(300, 300);
             size = 3;
         }};
     }

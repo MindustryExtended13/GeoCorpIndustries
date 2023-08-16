@@ -11,6 +11,7 @@ import gmod.util.GeoGroups;
 import gmod.util.IEntity;
 import mindustry.mod.Mods.LoadedMod;
 import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
 
 import static arc.Core.*;
 import static gmod.util.EnumMirror.*;
@@ -34,6 +35,10 @@ public class Part implements IEntity {
         this.mod = GeoCorp.requireNonNull(mod);
         id = GeoGroups.PARTS.index();
         GeoGroups.PARTS.register(this);
+    }
+
+    public void category(@NotNull PartsCategory category) {
+        category.parts.add(this);
     }
 
     public void size(int width, int height) {

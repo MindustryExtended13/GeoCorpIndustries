@@ -1,5 +1,6 @@
 package gmod.entity;
 
+import arc.Core;
 import arc.Events;
 import arc.func.Boolf;
 import arc.graphics.Color;
@@ -10,8 +11,11 @@ import arc.math.Angles;
 import arc.math.Mathf;
 import arc.math.geom.Position;
 import arc.math.geom.Vec2;
+import arc.scene.ui.Image;
+import arc.scene.ui.layout.Table;
 import arc.struct.ObjectSet;
 import arc.struct.Seq;
+import arc.util.Scaling;
 import arc.util.Structs;
 import arc.util.Time;
 import arc.util.Tmp;
@@ -45,12 +49,16 @@ import mindustry.logic.LAccess;
 import mindustry.type.AmmoType;
 import mindustry.type.Item;
 import mindustry.type.StatusEffect;
+import mindustry.ui.Bar;
 import mindustry.world.Build;
 import mindustry.world.Tile;
 import mindustry.world.blocks.ConstructBlock;
 import mindustry.world.blocks.environment.Floor;
 import mindustry.world.blocks.storage.CoreBlock;
 import org.jetbrains.annotations.NotNull;
+
+import static mindustry.Vars.*;
+import static mindustry.Vars.net;
 
 public class AbstractUnitEntity extends XeonUnitEntity {
     public Seq<PartEntity> entities = new Seq<>();
@@ -59,7 +67,7 @@ public class AbstractUnitEntity extends XeonUnitEntity {
             buildSpeedMultiplayer, mineSpeed, speed, clipSize, maxRange, aimDst;
     public boolean hasWeapons, hittable, rotateToBuilding, omniMovement, mineFloor, mineWalls;
     public ObjectSet<StatusEffect> immunities = new ObjectSet<>();
-    public int ammoCap, mineTier, itemCapacity;
+    public int ammoCap, mineTier, itemCapacity, payloadCapacity;
     public AmmoType ammoType;
 
     {
@@ -196,6 +204,72 @@ public class AbstractUnitEntity extends XeonUnitEntity {
 
         this.aimX = x;
         this.aimY = y;
+    }
+
+    @Override
+    public void display(Table table) {
+        table.table(t -> {
+            t.left();
+            t.labelWrap(isPlayer() ? getPlayer().coloredName() +
+                    "\n[lightgray]star ship" : "star ship").left().width(190f).padLeft(5);
+        }).growX().left();
+        table.row();
+
+        table.table(bars -> {
+            bars.defaults().growX().height(20f).pad(4);
+
+            //TODO overlay shields
+            bars.add(new Bar("stat.health", Pal.health, this::healthf).blink(Color.white));
+            bars.row();
+
+            if(state.rules.unitAmmo) {
+                bars.add(new Bar((ammoType instanceof MultiAmmoType ? "" : ammoType.icon() + " ") +
+                        Core.bundle.get("stat.ammo"), ammoType.barColor(), () -> ammo / ammoCap));
+                bars.row();
+            }
+
+            for(Ability ability : abilities) {
+                ability.displayBars(this, bars);
+            }
+
+            if(payloadCapacity > 0 && this instanceof Payloadc payload) {
+                bars.add(new Bar("stat.payloadcapacity", Pal.items, () -> payload.payloadUsed() /
+                        payloadCapacity));
+                bars.row();
+
+                var count = new float[]{-1};
+                bars.table().update(t -> {
+                    if(count[0] != payload.payloadUsed()){
+                        payload.contentInfo(t, 8 * 2, 270);
+                        count[0] = payload.payloadUsed();
+                    }
+                }).growX().left().height(0f).pad(0f);
+            }
+        }).growX();
+
+        if(controller() instanceof LogicAI ai){
+            table.row();
+            table.add(Blocks.microProcessor.emoji() + " " + Core.bundle.get("units.processorcontrol"))
+                    .growX().wrap().left();
+            if(ai.controller != null && (Core.settings.getBool("mouseposition") || Core.settings
+                    .getBool("position"))){
+                table.row();
+                table.add("[lightgray](" + ai.controller.tileX() + ", " + ai.controller.tileY() + ")")
+                        .growX().wrap().left();
+            }
+            table.row();
+            table.label(() -> Iconc.settings + " " + flag).color(Color.lightGray).growX().wrap().left();
+            if(net.active() && ai.controller != null && ai.controller.lastAccessed != null){
+                table.row();
+                table.add(Core.bundle.format("lastaccessed", ai.controller.lastAccessed))
+                        .growX().wrap().left();
+            }
+        }else if(net.active() && lastCommanded != null){
+            table.row();
+            table.add(Core.bundle.format("lastcommanded", lastCommanded)).growX().wrap().left();
+        }
+
+        table.row();
     }
 
     @Override
