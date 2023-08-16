@@ -21,7 +21,7 @@ public class PartEntity implements Position {
     public Part part;
 
     public float drawRot() {
-        return rotation * 90 - 90;
+        return rotation * 90;
     }
 
     public int drawRotation() {
@@ -85,7 +85,8 @@ public class PartEntity implements Position {
     }
 
     public Vec2 relativePosition() {
-        return isEditor() ? new Vec2(getX(), getY()) : entity.relative(this);
+        return isEditor() ? new Vec2(getX() - Part.PART_TILESIZE / 2f,
+                getY() - Part.PART_TILESIZE / 2f) : entity.relative(this);
     }
 
     @Override

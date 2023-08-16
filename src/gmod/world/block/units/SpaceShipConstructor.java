@@ -6,6 +6,7 @@ import gmod.parts.PartsConstructBuilder;
 import gmod.ui.PartsEditorDialog;
 import gmod.world.block.GeoBlock;
 import mindustry.gen.Icon;
+import org.jetbrains.annotations.NotNull;
 
 public class SpaceShipConstructor extends GeoBlock {
     public boolean creative = false;
@@ -29,13 +30,12 @@ public class SpaceShipConstructor extends GeoBlock {
         }
 
         @Override
-        public void buildConfiguration(Table table) {
+        public void buildConfiguration(@NotNull Table table) {
             table.button("Open editor", Icon.editor, () -> {
                 new PartsEditorDialog(this).show();
             }).size(250, 50).padBottom(3).row();
 
             table.button("Create", Icon.units, () -> {
-                builder.entities.each(builder::toUnit);
                 GeoCorp.construct(builder.entities, team, x, y);
                 builder.clear();
             }).size(250, 50);

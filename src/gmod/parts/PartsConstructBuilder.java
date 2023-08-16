@@ -37,9 +37,4 @@ public class PartsConstructBuilder {
     public int centerY() {
         return Mathf.round(h/2f);
     }
-
-    public void toUnit(@NotNull PartEntity entity) {
-        entity.x -= centerX();
-        entity.y -= centerY();
-    }
 }

@@ -8,6 +8,7 @@ import arc.math.geom.Vec2;
 import arc.struct.ObjectMap;
 import gmod.GeoCorp;
 import gmod.parts.Part;
+import gmod.parts.PartEntity;
 import gmod.parts.PartsConstructBuilder;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
@@ -29,6 +30,10 @@ public class PartsGraphics {
 
     public static void set(int id, float value) {
         map.put(id, value);
+    }
+
+    public static float rotation(@NotNull PartEntity entity) {
+        return entity.drawRot() + (entity.isEditor() ? 0 : entity.entity.rotation - 90);
     }
 
     @Contract("_, _ -> new")
@@ -63,14 +68,22 @@ public class PartsGraphics {
     }
 
     public static void texture(TextureRegion region, float x, float y) {
-        texture(region, x, y, region.width, region.height);
+        texture(region, x, y, 0);
+    }
+
+    public static void texture(TextureRegion region, float x, float y, float rot) {
+        texture(region, x, y, region.width, region.height, rot);
     }
 
     public static void texture(TextureRegion region, float x, float y, float width, float height) {
-        Draw.rect(region, transformX(x), transformY(y), transformWidth(width), transformHeight(height));
+        texture(region, x, y, width, height, 0);
     }
 
-    static {
+    public static void texture(TextureRegion region, float x, float y, float width, float height, float rot) {
+        Draw.rect(region, transformX(x), transformY(y), transformWidth(width), transformHeight(height), rot);
+    }
+
+    public static void reset() {
         set(EDITOR_TRANSFORM_X, 0);
         set(EDITOR_TRANSFORM_Y, 0);
         set(EDITOR_WIDTH, 0);
@@ -78,5 +91,9 @@ public class PartsGraphics {
         set(EDITOR_OFFSET_X, 0);
         set(EDITOR_OFFSET_Y, 0);
         set(EDITOR_SCALE, 1);
+    }
+
+    static {
+        reset();
     }
 }

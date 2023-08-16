@@ -15,6 +15,7 @@ import arc.scene.ui.Image;
 import gmod.GeoCorp;
 import gmod.parts.Part;
 import gmod.parts.PartBuildPlan;
+import gmod.parts.PartEntity;
 import gmod.parts.PartsConstructBuilder;
 import gmod.world.block.units.SpaceShipConstructor.SpaceShipConstructorBuild;
 
@@ -48,6 +49,10 @@ public class PartsEditorElement extends Image {
         scale = Mathf.clamp(amount, minScale, maxScale);
     }
 
+    public boolean hasCurrent() {
+        return current != null && current.part != null;
+    }
+
     public PartsEditorElement(SpaceShipConstructorBuild build) {
         super();
         this.build = build;
@@ -66,10 +71,12 @@ public class PartsEditorElement extends Image {
 
             @Override
             public void touchDragged(InputEvent event, float x, float y, int pointer) {
-                canvasX = (x - anchorx) + prevcanvasx;
-                canvasY = (y - anchory) + prevcanvasy;
                 mouseX = x;
                 mouseY = y;
+                if(!hasCurrent()) {
+                    canvasX = (x - anchorx) + prevcanvasx;
+                    canvasY = (y - anchory) + prevcanvasy;
+                }
             }
 
             @Override
@@ -80,6 +87,10 @@ public class PartsEditorElement extends Image {
                 mouseY = y;
                 prevcanvasx = canvasX;
                 prevcanvasy = canvasY;
+                if(hasCurrent()) {
+                    GeoCorp.LOGGER.info("x: {}, y: {}", current.x, current.y);
+                    build.builder.set(current.part, current.x, current.y, current.rotation, current.mirror);
+                }
                 return true;
             }
 
@@ -116,24 +127,33 @@ public class PartsEditorElement extends Image {
 
         float s = Part.PART_TILESIZE;
         boolean b = false;
-        for(float x = 0; x < b2.w * s; x += s) {
-            for(float y = 0; y < b2.h * s; y += s) {
+        float hw = b2.w * s * 0.5f;
+        float hh = b2.h * s * 0.5f;
+        for(float x = -hw; x < hw * 2; x += s) {
+            for(float y = -hh; y < hh * 2; y += s) {
                 texture(b ? tileBSprite : tileASprite, x, y, s, s);
                 b = !b;
             }
             b = !b;
         }
 
-        if(current != null && current.part != null) {
+        Draw.color(Color.red);
+        texture(solid, 2, 2, b2.w * s, 2);
+        texture(solid, 2, 2, 2, b2.h * s);
+        Draw.color(Color.white);
+
+        build.builder.entities.each(PartEntity::draw);
+
+        if(hasCurrent()) {
+            Draw.alpha(0.5f);
             Point2 out = uiToGrid(mouseX, mouseY);
             current.x = out.x;
             current.y = out.y;
-            Vec2 v = gridToUI(out.x, out.y);
-            Draw.color(Color.red);
-            texture(solid, v.x, v.y, s, s);
+            current.part.drawPlan(current);
         }
 
         Draw.reset();
         ScissorStack.pop();
+        reset();
     }
 }

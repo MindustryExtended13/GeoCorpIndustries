@@ -18,11 +18,19 @@ public class PartBuildPlan {
         return rotation * 90;
     }
 
+    public float width() {
+        return part.width * Part.PART_TILESIZE;
+    }
+
+    public float height() {
+        return part.height * Part.PART_TILESIZE;
+    }
+
     public float drawx() {
-        return x * Part.PART_TILESIZE;
+        return x * Part.PART_TILESIZE + width() / 2 - Part.PART_TILESIZE / 2f;
     }
 
     public float drawy() {
-        return y * Part.PART_TILESIZE;
+        return y * Part.PART_TILESIZE + height() / 2 - Part.PART_TILESIZE / 2f;
     }
 }

@@ -10,6 +10,9 @@ import gmod.GeoCorp;
 import gmod.parts.Part;
 import gmod.parts.PartBuildPlan;
 import gmod.parts.PartEntity;
+import org.jetbrains.annotations.NotNull;
+
+import static gmod.graphics.PartsGraphics.*;
 
 public class DrawRegionPart extends PartDraw {
     public Color color = Color.white;
@@ -37,15 +40,14 @@ public class DrawRegionPart extends PartDraw {
     }
 
     @Override
-    public void draw(PartEntity entity) {
-        float rotation = entity.drawRot() + (entity.isEditor() ? 0 : entity.entity.rotation);
+    public void draw(@NotNull PartEntity entity) {
         Vec2 position = entity.relativePosition();
         Draw.color(GeoCorp.returnNonNull(color, entity.partColor));
-        Draw.rect(region, position.x, position.y, rotation);
+        texture(region, position.x, position.y, entity.width(), entity.height(), rotation(entity));
     }
 
     @Override
-    public void drawPlan(PartBuildPlan plan) {
-        Draw.rect(region, plan.drawx(), plan.drawy(), plan.drawrot());
+    public void drawPlan(@NotNull PartBuildPlan plan) {
+        texture(region, plan.drawx(), plan.drawy(), plan.width(), plan.height(), plan.drawrot());
     }
 }
