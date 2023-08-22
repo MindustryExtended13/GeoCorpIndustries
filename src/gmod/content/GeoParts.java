@@ -16,7 +16,7 @@ public class GeoParts {
         engine = new EnginePart("basic-engine", GeoCorp.instance) {{
             category(GeoCategories.flight);
             size(2);
-            speed(2);
+            speed(1);
             addMask();
         }};
         fusionReactor = new Part("fusion-reactor", GeoCorp.instance) {{

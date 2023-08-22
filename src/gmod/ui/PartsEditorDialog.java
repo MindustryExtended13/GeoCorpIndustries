@@ -1,8 +1,6 @@
 package gmod.ui;
 
-import arc.graphics.Color;
 import arc.graphics.g2d.TextureRegion;
-import arc.math.Mathf;
 import arc.scene.event.ClickListener;
 import arc.scene.event.HandCursorListener;
 import arc.scene.style.TextureRegionDrawable;
@@ -40,8 +38,11 @@ public class PartsEditorDialog extends BaseDialog {
                     button.button(Icon.copy, Styles.cleari, () -> {
                     }).tooltip("Copy");
                     button.button(Icon.pencil, Styles.cleari, () -> {
+                        element.deletion = false;
                     }).tooltip("Place mod");
                     button.button(Icon.cancel, Styles.cleari, () -> {
+                        element.deletion = true;
+                        element.current.part = null;
                     }).tooltip("Delete mode");
                     button.button(Icon.rotate, Styles.cleari, () -> {
                         if(element.hasCurrent()) {

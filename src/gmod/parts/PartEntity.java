@@ -22,7 +22,7 @@ public class PartEntity implements Position {
     public Part part;
 
     public boolean is2() {
-        return rotation == 1 || rotation == 2;
+        return rotation == 1 || rotation == 3;
     }
 
     public float drawRot() {

@@ -1,11 +1,13 @@
 package gmod.parts;
 
 import arc.func.Prov;
+import arc.struct.Seq;
 import gmod.GeoCorp;
 import gmod.GeoCorpException;
 import gmod.graphics.DrawRegionPart;
 import gmod.graphics.MultiPartDraw;
 import gmod.graphics.PartDraw;
+import gmod.ui.PartsEditorElement;
 import gmod.util.EnumMirror;
 import gmod.util.GeoGroups;
 import gmod.util.IEntity;
@@ -98,6 +100,39 @@ public class Part implements IEntity {
 
     public String description() {
         return bundle.get("parts." + publicName() + ".description");
+    }
+
+    public boolean canPlace(@NotNull PartBuildPlan plan, @NotNull PartsEditorElement element) {
+        Seq<PartEntity> ent = element.build.builder.entities;
+        int _tmp_w = plan.is2() ? plan.part.height : plan.part.width;
+        int _tmp_h = plan.is2() ? plan.part.width : plan.part.height;
+        for(PartEntity entity : ent) {
+            int w = entity.is2() ? entity.part.height : entity.part.width;
+            int h = entity.is2() ? entity.part.width : entity.part.height;
+            if(((plan.x + _tmp_w) > entity.x && (plan.x + _tmp_w) <= (entity.x + w)) ||
+                    (plan.x >= entity.x && plan.x < (entity.x + w))) {
+                if (((plan.y + _tmp_h) > entity.y && (plan.y + _tmp_h) <= (entity.y + h)) ||
+                        (plan.y >= entity.y && plan.y < (entity.y + h))) {
+                    return false;
+                }
+            }
+        }
+        if(ent.isEmpty()) {
+            return true;
+        }
+        for(PartEntity entity : ent) {
+            int w = entity.is2() ? entity.part.height : entity.part.width;
+            int h = entity.is2() ? entity.part.width : entity.part.height;
+            if(((plan.x + _tmp_w) >= entity.x && (plan.x + _tmp_w) < (entity.x + w)) ||
+                    (plan.x > entity.x && plan.x <= (entity.x + w))) {
+                if (((plan.y + _tmp_h) >= entity.y && (plan.y + _tmp_h) < (entity.y + h)) ||
+                        (plan.y > entity.y && plan.y <= (entity.y + h))) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
     @Override

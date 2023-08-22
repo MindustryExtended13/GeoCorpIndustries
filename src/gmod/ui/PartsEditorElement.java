@@ -12,12 +12,15 @@ import arc.math.geom.Vec2;
 import arc.scene.event.InputEvent;
 import arc.scene.event.InputListener;
 import arc.scene.ui.Image;
+import arc.struct.Seq;
 import gmod.GeoCorp;
 import gmod.parts.Part;
 import gmod.parts.PartBuildPlan;
 import gmod.parts.PartEntity;
 import gmod.parts.PartsConstructBuilder;
 import gmod.world.block.units.SpaceShipConstructor.SpaceShipConstructorBuild;
+import mindustry.graphics.Pal;
+import org.jetbrains.annotations.NotNull;
 
 import static arc.Core.*;
 import static gmod.graphics.PartsGraphics.*;
@@ -31,6 +34,8 @@ public class PartsEditorElement extends Image {
     public TextureRegion solid;
     public TextureRegion space;
     public PartBuildPlan current = new PartBuildPlan(null, 0, 0);
+    public PartEntity selected = null;
+    public boolean deletion = false;
     public float scale = 5;
     public float canvasX = 0;
     public float canvasY = 0;
@@ -45,12 +50,56 @@ public class PartsEditorElement extends Image {
     public static float minScale = 1f;
     public static float maxScale = 10f;
 
+    public void updateSelected() {
+        selected = null;
+        Point2 out = uiToGrid(mouseX, mouseY);
+        for(PartEntity entity : build.builder.entities) {
+            int w = entity.is2() ? entity.part.height : entity.part.width;
+            int h = entity.is2() ? entity.part.width : entity.part.height;
+            if(((out.x + 1) > entity.x && (out.x + 1) <= (entity.x + w)) ||
+                    (out.x >= entity.x && out.x < (entity.x + w))) {
+                if (((out.y + 1) > entity.y && (out.y + 1) <= (entity.y + h)) ||
+                        (out.y >= entity.y && out.y < (entity.y + h))) {
+                    selected = entity;
+                }
+            }
+        }
+    }
+
     public void scale(float amount) {
         scale = Mathf.clamp(amount, minScale, maxScale);
     }
 
+    public boolean canPlace(@NotNull PartBuildPlan plan) {
+        return plan.part.canPlace(plan, this);
+    }
+
     public boolean hasCurrent() {
         return current != null && current.part != null;
+    }
+
+    public void handlePlace(Runnable mover) {
+        if(!deletion) {
+            if(!hasCurrent()) {
+                mover.run();
+            } else if(canPlace(current)) {
+                build.builder.set(current.part, current.x, current.y,
+                        current.rotation, current.mirror);
+            }
+        } else {
+            if(selected != null) {
+                Seq<PartEntity> entities = new Seq<>();
+                for(PartEntity ent : build.builder.entities) {
+                    if(ent == selected) {
+                        continue;
+                    }
+
+                    entities.add(ent);
+                }
+                build.builder.entities.clear();
+                build.builder.entities.add(entities);
+            }
+        }
     }
 
     public PartsEditorElement(SpaceShipConstructorBuild build) {
@@ -73,10 +122,10 @@ public class PartsEditorElement extends Image {
             public void touchDragged(InputEvent event, float x, float y, int pointer) {
                 mouseX = x;
                 mouseY = y;
-                if(!hasCurrent()) {
+                handlePlace(() -> {
                     canvasX = (x - anchorx) + prevcanvasx;
                     canvasY = (y - anchory) + prevcanvasy;
-                }
+                });
             }
 
             @Override
@@ -87,10 +136,7 @@ public class PartsEditorElement extends Image {
                 mouseY = y;
                 prevcanvasx = canvasX;
                 prevcanvasy = canvasY;
-                if(hasCurrent()) {
-                    GeoCorp.LOGGER.info("x: {}, y: {}", current.x, current.y);
-                    build.builder.set(current.part, current.x, current.y, current.rotation, current.mirror);
-                }
+                handlePlace(() -> {});
                 return true;
             }
 
@@ -110,7 +156,7 @@ public class PartsEditorElement extends Image {
         PartsConstructBuilder b2 = build.builder;
         widgetAreaBounds.set(x,y,width,height);
         scene.calculateScissors(widgetAreaBounds, scissorBounds);
-        if(!ScissorStack.push(scissorBounds)){
+        if(!ScissorStack.push(scissorBounds)) {
             return;
         }
         set(EDITOR_TRANSFORM_X, x + imageX);
@@ -129,8 +175,8 @@ public class PartsEditorElement extends Image {
         boolean b = false;
         float hw = b2.w * s * 0.5f;
         float hh = b2.h * s * 0.5f;
-        for(float x = -hw; x < hw * 2; x += s) {
-            for(float y = -hh; y < hh * 2; y += s) {
+        for(float x = -hw; x < hw; x += s) {
+            for(float y = -hh; y < hh; y += s) {
                 texture(b ? tileBSprite : tileASprite, x, y, s, s);
                 b = !b;
             }
@@ -138,18 +184,31 @@ public class PartsEditorElement extends Image {
         }
 
         Draw.color(Color.red);
-        texture(solid, 2, 2, b2.w * s, 2);
-        texture(solid, 2, 2, 2, b2.h * s);
+        texture(solid, -2, 2, b2.w * s, 1);
+        texture(solid, 2, -2, 1, b2.h * s);
         Draw.color(Color.white);
-
         build.builder.entities.each(PartEntity::draw);
+        Point2 out = uiToGrid(mouseX, mouseY);
 
-        if(hasCurrent()) {
-            Draw.alpha(0.5f);
-            Point2 out = uiToGrid(mouseX, mouseY);
+        if(hasCurrent() && !deletion) {
+            Draw.color(canPlace(current) ? Pal.accent : Color.red);
+            Draw.alpha(0.7f);
             current.x = out.x;
             current.y = out.y;
             current.part.drawPlan(current);
+        }
+
+        if(deletion) {
+            updateSelected();
+            PartEntity entity = selected;
+            Draw.color(Color.red);
+            if(entity != null) {
+                texture(solid, entity.getX() - 2, entity.getY() - 2,
+                        entity.width(), entity.height(), entity.drawRot());
+            } else {
+                Vec2 v = gridToUI(out.x, out.y);
+                texture(solid, v.x, v.y, s, s);
+            }
         }
 
         Draw.reset();

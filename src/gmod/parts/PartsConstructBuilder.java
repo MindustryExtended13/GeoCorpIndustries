@@ -1,6 +1,5 @@
 package gmod.parts;
 
-import arc.math.Mathf;
 import arc.struct.Seq;
 import gmod.util.EnumMirror;
 import org.jetbrains.annotations.NotNull;
@@ -28,13 +27,5 @@ public class PartsConstructBuilder {
 
     public void clear() {
         entities.clear();
-    }
-
-    public int centerX() {
-        return Mathf.round(w/2f);
-    }
-
-    public int centerY() {
-        return Mathf.round(h/2f);
     }
 }
