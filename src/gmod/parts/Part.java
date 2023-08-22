@@ -19,7 +19,7 @@ import static arc.Core.*;
 import static gmod.util.EnumMirror.*;
 
 public class Part implements IEntity {
-    public static final int PART_MAX_SIZE = 32;
+    public static final int PART_MAX_SIZE = 16;
     public static final int PART_TILESIZE = 4;
     public final LoadedMod mod;
     public final String name;
@@ -113,7 +113,7 @@ public class Part implements IEntity {
             }
         }
         if(ent.isEmpty()) {
-            return true;
+            return plan.x == 0 || plan.y == 0 || plan.x == -1 || plan.y == -1;
         }
         for(PartEntity entity : ent) {
             int w = entity.is2() ? entity.part.height : entity.part.width;

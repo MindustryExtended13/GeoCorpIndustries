@@ -41,16 +41,18 @@ public class PartsEditorElement extends Image {
     public EnumMirror mirror = EnumMirror.NO_MIRROR;
     public PartEntity selected = null;
     public boolean deletion = false;
+    public boolean painting = false;
     public float scale = 5;
     public float canvasX = 0;
     public float canvasY = 0;
     public float mouseX = 0;
     public float mouseY = 0;
-
     public float anchorx;
     public float anchory;
     public float prevcanvasx;
     public float prevcanvasy;
+    //r g b because Color crashes ui
+    public float r = 1, g = 1, b = 1;
 
     public static float minScale = 1f;
     public static float maxScale = 10f;
@@ -71,6 +73,15 @@ public class PartsEditorElement extends Image {
         }
     }
 
+    public void fix() {
+        if(hasCurrent() && (deletion || painting)) {
+            current.part = null;
+        }
+        if(deletion && painting) {
+            deletion = false;
+        }
+    }
+
     public void scale(float amount) {
         scale = Mathf.clamp(amount, minScale, maxScale);
     }
@@ -85,8 +96,12 @@ public class PartsEditorElement extends Image {
 
     public void handlePlace(Runnable mover) {
         if(!deletion) {
-            if(!hasCurrent()) {
+            if(!hasCurrent() && !painting) {
                 mover.run();
+            } else if(painting) {
+                if(selected != null) {
+                    selected.partColor = new Color(r, g, b);
+                }
             } else {
                 plans.each(plan -> {
                     if(canPlace(plan)) {
@@ -167,6 +182,7 @@ public class PartsEditorElement extends Image {
         if(!ScissorStack.push(scissorBounds)) {
             return;
         }
+        fix();
         set(EDITOR_TRANSFORM_X, x + imageX);
         set(EDITOR_TRANSFORM_Y, y + imageY);
         set(EDITOR_WIDTH, imageWidth);
@@ -191,9 +207,9 @@ public class PartsEditorElement extends Image {
             b = !b;
         }
 
-        Draw.color(EnumMirror.mirrorY(mirror) ? Color.cyan : Color.red);
+        Draw.color(EnumMirror.mirrorY(mirror) ? Color.cyan : Color.yellow);
         texture(solid, -2, -2, b2.w * s, 1);
-        Draw.color(EnumMirror.mirrorX(mirror) ? Color.cyan : Color.red);
+        Draw.color(EnumMirror.mirrorX(mirror) ? Color.cyan : Color.yellow);
         texture(solid, -2, -2, 1, b2.h * s);
         Draw.color(Color.white);
         build.builder.entities.each(PartEntity::draw);
@@ -235,10 +251,10 @@ public class PartsEditorElement extends Image {
             });
         }
 
-        if(deletion) {
+        if(deletion || painting) {
             updateSelected();
             PartEntity entity = selected;
-            Draw.color(Color.red);
+            Draw.color(painting ? Color.orange : Color.red);
             if(entity != null) {
                 texture(solid, entity.getX() - 2, entity.getY() - 2,
                         entity.width(), entity.height(), entity.drawRot());

@@ -32,19 +32,50 @@ public class PartsEditorDialog extends BaseDialog {
         element = new PartsEditorElement(build);
         add(element).grow().row();
         table(menu -> {
+            Table[] tableA = new Table[1];
+            Runnable rebuild2 = () -> {
+                Table table = tableA[0];
+                table.clearChildren();
+                if(element.painting) {
+                    table.table(colors -> {
+                        colors.defaults().size(150, 40).padTop(3);
+                        colors.slider(0, 255, 1, element.r * 255, (ignored) -> {}).update((s) -> {
+                            element.r = s.getValue() / 255f;
+                        }).padTop(0).row();
+                        colors.slider(0, 255, 1, element.g * 255, (ignored) -> {}).update((s) -> {
+                            element.g = s.getValue() / 255f;
+                        }).row();
+                        colors.slider(0, 255, 1, element.b * 255, (ignored) -> {}).update((s) -> {
+                            element.b = s.getValue() / 255f;
+                        });
+                    }).pad(0);
+                    table.image().update(img -> {
+                        img.setDrawable(((TextureRegionDrawable) img.getDrawable())
+                                .tint(element.r, element.g, element.b, 1.0f));
+                    }).size(40, 120);
+                } else {
+                    table.defaults().size(200, 70).pad(6);
+                    table.button("Export ship", Icon.export, () -> {}).row();
+                    table.button("Import ship", Icon.upload, () -> {});
+                }
+            };
             menu.setBackground(Styles.black);
             menu.table(pane -> {
                 pane.setBackground(Tex.paneRight);
                 pane.table(button -> {
                     button.defaults().size(48);
                     button.button(Icon.copy, Styles.cleari, () -> {
-                    }).tooltip("Copy");
+                    }).tooltip("Copy ship");
                     button.button(Icon.pencil, Styles.cleari, () -> {
                         element.deletion = false;
+                        element.painting = false;
+                        rebuild2.run();
                     }).tooltip("Place mod");
                     button.button(Icon.cancel, Styles.cleari, () -> {
                         element.deletion = true;
+                        element.painting = false;
                         element.current.part = null;
+                        rebuild2.run();
                     }).tooltip("Delete mode");
                     button.button(Icon.rotate, Styles.cleari, () -> {
                         if(element.hasCurrent()) {
@@ -66,9 +97,26 @@ public class PartsEditorDialog extends BaseDialog {
                             element.mirror = mirrorX(element.mirror) ? MIRROR_XY : MIRROR_Y;
                         }
                     }).tooltip("Mirror Y");
+                    button.button(Icon.move, Styles.cleari, () -> {
+                        element.current.part = null;
+                        element.deletion = false;
+                        element.painting = false;
+                        rebuild2.run();
+                    }).tooltip("Drag move");
+                    button.button(Icon.fill, Styles.cleari, () -> {
+                        element.painting = true;
+                        element.deletion = false;
+                        element.current.part = null;
+                        rebuild2.run();
+                    }).tooltip("Paint part");
                 }).grow().row();
                 pane.button("@close", Icon.left, this::hide).size(150, 40);
-            }).pad(6).growY();
+            }).growY();
+            menu.table(pane -> {
+                pane.setBackground(Tex.paneRight);
+                tableA[0] = pane;
+                rebuild2.run();
+            }).growY();
             menu.table(selection -> {
                 final Table[] el = new Table[1];
                 Runnable rebuild = () -> {
@@ -84,7 +132,8 @@ public class PartsEditorDialog extends BaseDialog {
                             for(TextureRegion icon : part.drawer.icons()) {
                                 stack.add(new Table(o -> {
                                     o.left();
-                                    o.add(new Image(icon)).size(50).padLeft(25/2f).scaling(Scaling.fit);
+                                    float s = part.width == 1 && part.height == 1 ? 25f : 50f;
+                                    o.add(new Image(icon)).size(s).padLeft((75-s)/2f).scaling(Scaling.fit);
                                 }));
                             }
                             ClickListener listener = new ClickListener();
@@ -92,6 +141,9 @@ public class PartsEditorDialog extends BaseDialog {
                             stack.addListener(new HandCursorListener());
                             stack.clicked(() -> {
                                 element.current.part = part;
+                                element.deletion = false;
+                                element.painting = false;
+                                rebuild2.run();
                             });
                             e.add(stack).padRight(6).size(75).tooltip(t -> {
                                 t.setBackground(Tex.button);

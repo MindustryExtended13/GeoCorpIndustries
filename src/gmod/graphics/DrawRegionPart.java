@@ -44,6 +44,7 @@ public class DrawRegionPart extends PartDraw {
         Vec2 position = entity.relativePosition();
         Draw.color(GeoCorp.returnNonNull(color, entity.partColor));
         texture(region, position.x, position.y, entity.width(), entity.height(), rotation(entity));
+        Draw.reset();
     }
 
     @Override
