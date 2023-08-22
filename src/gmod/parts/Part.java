@@ -118,10 +118,12 @@ public class Part implements IEntity {
         for(PartEntity entity : ent) {
             int w = entity.is2() ? entity.part.height : entity.part.width;
             int h = entity.is2() ? entity.part.width : entity.part.height;
-            if(((plan.x + _tmp_w) >= entity.x && (plan.x + _tmp_w) < (entity.x + w)) ||
-                    (plan.x > entity.x && plan.x <= (entity.x + w))) {
-                if (((plan.y + _tmp_h) >= entity.y && (plan.y + _tmp_h) < (entity.y + h)) ||
-                        (plan.y > entity.y && plan.y <= (entity.y + h))) {
+            w += 2;
+            h += 2;
+            if(((plan.x + _tmp_w) > entity.x-1 && (plan.x + _tmp_w) <= (entity.x-1 + w)) ||
+                    (plan.x >= entity.x-1 && plan.x < (entity.x-1 + w))) {
+                if (((plan.y + _tmp_h) > entity.y-1 && (plan.y + _tmp_h) <= (entity.y-1 + h)) ||
+                        (plan.y >= entity.y-1 && plan.y < (entity.y-1 + h))) {
                     return true;
                 }
             }
