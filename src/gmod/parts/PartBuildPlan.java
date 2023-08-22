@@ -1,12 +1,9 @@
 package gmod.parts;
 
-import gmod.util.EnumMirror;
-
 public class PartBuildPlan {
     public Part part;
     public int x, y;
     public int rotation = 0;
-    public EnumMirror mirror = EnumMirror.NO_MIRROR;
 
     public PartBuildPlan(Part part, int x, int y) {
         this.part = part;

@@ -1,20 +1,15 @@
 package gmod.parts;
 
 import arc.graphics.Color;
-import arc.math.Mathf;
 import arc.math.geom.Position;
 import arc.math.geom.Vec2;
 import arc.util.io.Reads;
 import arc.util.io.Writes;
-import gmod.GeoCorp;
 import gmod.entity.AbstractUnitEntity;
-import gmod.util.EnumMirror;
 import gmod.util.GeoGroups;
-import me13.core.block.BlockAngles;
 import org.jetbrains.annotations.NotNull;
 
 public class PartEntity implements Position {
-    public EnumMirror mirror = EnumMirror.NO_MIRROR;
     public Color partColor = Color.white;
     public AbstractUnitEntity entity;
     public int rotation = 0;
@@ -66,8 +61,6 @@ public class PartEntity implements Position {
 
     public void read(@NotNull Reads reads) {
         part = GeoGroups.PARTS.getByID(reads.i());
-        EnumMirror[] mirrors = EnumMirror.values();
-        mirror = mirrors[Mathf.clamp(reads.i(), 0, mirrors.length - 1)];
         rotation = reads.i();
         x = reads.i();
         y = reads.i();
@@ -75,7 +68,6 @@ public class PartEntity implements Position {
 
     public void write(@NotNull Writes writes) {
         writes.i(part.id);
-        writes.i(GeoCorp.returnNonNull(mirror, EnumMirror.NO_MIRROR).ordinal());
         writes.i(rotation);
         writes.i(x);
         writes.i(y);

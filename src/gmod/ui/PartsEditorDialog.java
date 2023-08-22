@@ -8,7 +8,6 @@ import arc.scene.ui.Image;
 import arc.scene.ui.layout.Stack;
 import arc.scene.ui.layout.Table;
 import arc.util.Scaling;
-import gmod.GeoCorp;
 import gmod.parts.Part;
 import gmod.parts.PartsCategory;
 import gmod.util.GeoGroups;
@@ -17,6 +16,9 @@ import mindustry.gen.Icon;
 import mindustry.gen.Tex;
 import mindustry.ui.Styles;
 import mindustry.ui.dialogs.BaseDialog;
+
+import static gmod.GeoCorp.*;
+import static gmod.util.EnumMirror.*;
 
 public class PartsEditorDialog extends BaseDialog {
     public SpaceShipConstructorBuild build;
@@ -50,10 +52,20 @@ public class PartsEditorDialog extends BaseDialog {
                         }
                     }).tooltip("Rotate part");
                     button.row();
-                    button.button(new TextureRegionDrawable(GeoCorp.asset("mirror-x")), Styles.clearTogglei,
-                            () -> {}).tooltip("Mirror X");
-                    button.button(new TextureRegionDrawable(GeoCorp.asset("mirror-y")), Styles.clearTogglei,
-                            () -> {}).tooltip("Mirror Y");
+                    button.button(new TextureRegionDrawable(asset("mirror-x")), Styles.clearTogglei, () -> {
+                        if(mirrorX(element.mirror)) {
+                            element.mirror = mirrorY(element.mirror) ? MIRROR_Y : NO_MIRROR;
+                        } else {
+                            element.mirror = mirrorY(element.mirror) ? MIRROR_XY : MIRROR_X;
+                        }
+                    }).tooltip("Mirror X");
+                    button.button(new TextureRegionDrawable(asset("mirror-y")), Styles.clearTogglei, () -> {
+                        if(mirrorY(element.mirror)) {
+                            element.mirror = mirrorX(element.mirror) ? MIRROR_X : NO_MIRROR;
+                        } else {
+                            element.mirror = mirrorX(element.mirror) ? MIRROR_XY : MIRROR_Y;
+                        }
+                    }).tooltip("Mirror Y");
                 }).grow().row();
                 pane.button("@close", Icon.left, this::hide).size(150, 40);
             }).pad(6).growY();
@@ -67,9 +79,7 @@ public class PartsEditorDialog extends BaseDialog {
                             Stack stack = new Stack();
                             stack.add(new Table(o -> {
                                 o.left();
-                                o.add(new Image(GeoCorp.asset(
-                                        "default-part-background"
-                                ))).size(75).scaling(Scaling.fit);
+                                o.add(new Image(asset("default-part-background"))).size(75).scaling(Scaling.fit);
                             }));
                             for(TextureRegion icon : part.drawer.icons()) {
                                 stack.add(new Table(o -> {

@@ -1,5 +1,6 @@
 package gmod.ui;
 
+import arc.func.Intc2;
 import arc.graphics.Color;
 import arc.graphics.g2d.Draw;
 import arc.graphics.g2d.ScissorStack;
@@ -18,7 +19,9 @@ import gmod.parts.Part;
 import gmod.parts.PartBuildPlan;
 import gmod.parts.PartEntity;
 import gmod.parts.PartsConstructBuilder;
+import gmod.util.EnumMirror;
 import gmod.world.block.units.SpaceShipConstructor.SpaceShipConstructorBuild;
+import me13.core.block.BlockAngles;
 import mindustry.graphics.Pal;
 import org.jetbrains.annotations.NotNull;
 
@@ -34,6 +37,8 @@ public class PartsEditorElement extends Image {
     public TextureRegion solid;
     public TextureRegion space;
     public PartBuildPlan current = new PartBuildPlan(null, 0, 0);
+    public Seq<PartBuildPlan> plans = new Seq<>();
+    public EnumMirror mirror = EnumMirror.NO_MIRROR;
     public PartEntity selected = null;
     public boolean deletion = false;
     public float scale = 5;
@@ -82,9 +87,12 @@ public class PartsEditorElement extends Image {
         if(!deletion) {
             if(!hasCurrent()) {
                 mover.run();
-            } else if(canPlace(current)) {
-                build.builder.set(current.part, current.x, current.y,
-                        current.rotation, current.mirror);
+            } else {
+                plans.each(plan -> {
+                    if(canPlace(plan)) {
+                        build.builder.set(plan.part, plan.x, plan.y, plan.rotation);
+                    }
+                });
             }
         } else {
             if(selected != null) {
@@ -183,19 +191,48 @@ public class PartsEditorElement extends Image {
             b = !b;
         }
 
-        Draw.color(Color.red);
-        texture(solid, -2, 2, b2.w * s, 1);
-        texture(solid, 2, -2, 1, b2.h * s);
+        Draw.color(EnumMirror.mirrorY(mirror) ? Color.cyan : Color.red);
+        texture(solid, -2, -2, b2.w * s, 1);
+        Draw.color(EnumMirror.mirrorX(mirror) ? Color.cyan : Color.red);
+        texture(solid, -2, -2, 1, b2.h * s);
         Draw.color(Color.white);
         build.builder.entities.each(PartEntity::draw);
         Point2 out = uiToGrid(mouseX, mouseY);
 
+        plans.clear();
         if(hasCurrent() && !deletion) {
-            Draw.color(canPlace(current) ? Pal.accent : Color.red);
-            Draw.alpha(0.7f);
             current.x = out.x;
             current.y = out.y;
-            current.part.drawPlan(current);
+            plans.add(current);
+            if(EnumMirror.mirrorX(mirror)) {
+                Part part = current.part;
+                int ox = current.is2() ? part.height : part.width;
+                PartBuildPlan x = new PartBuildPlan(part, -out.x - ox, out.y);
+                x.rotation = current.is2() ? BlockAngles.reverse(current.rotation) : current.rotation;
+                plans.add(x);
+            }
+            if(EnumMirror.mirrorY(mirror)) {
+                Intc2 intc2 = (x, r) -> {
+                    Part part = current.part;
+                    int oy = current.is2() ? part.width : part.height;
+                    PartBuildPlan y = new PartBuildPlan(part, x, -out.y - oy);
+                    y.rotation = !current.is2() ? BlockAngles.reverse(current.rotation) : current.rotation;
+                    y.rotation = current.is2() ? (y.rotation + r) % 4 : y.rotation;
+                    plans.add(y);
+                };
+                intc2.get(out.x, 0);
+                if(EnumMirror.mirrorX(mirror)) {
+                    intc2.get(plans.get(1).x, 2);
+                }
+            }
+        }
+
+        if(hasCurrent() && !deletion) {
+            plans.each(plan -> {
+                Draw.color(canPlace(plan) ? Pal.accent : Color.red);
+                Draw.alpha(0.7f);
+                plan.part.drawPlan(plan);
+            });
         }
 
         if(deletion) {

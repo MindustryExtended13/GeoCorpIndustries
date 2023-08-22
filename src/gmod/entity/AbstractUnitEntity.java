@@ -100,30 +100,14 @@ public class AbstractUnitEntity extends XeonUnitEntity {
     }
 
     public void resetAmmoType() {
-        ammoType = new AmmoType() {
-            @Override
-            public String icon() {
-                return "";
-            }
-
-            @Override
-            public Color color() {
-                return Color.white;
-            }
-
-            @Override
-            public Color barColor() {
-                return Color.white;
-            }
-
-            @Override
-            public void resupply(Unit unit) {
-            }
-        };
+        if(ammoType instanceof MultiAmmoType) {
+            ((MultiAmmoType) ammoType).types.clear();
+        } else {
+            ammoType = new MultiAmmoType();
+        }
     }
 
     public void resetStats() {
-        type.
         buildSpeed = 0f;
         buildRange = 80f;
         range = 80f;

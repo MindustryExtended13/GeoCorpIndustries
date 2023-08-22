@@ -1,7 +1,6 @@
 package gmod.parts;
 
 import arc.struct.Seq;
-import gmod.util.EnumMirror;
 import org.jetbrains.annotations.NotNull;
 
 public class PartsConstructBuilder {
@@ -17,12 +16,8 @@ public class PartsConstructBuilder {
         set(part, x, y, 0);
     }
 
-    public void set(Part part, int x, int y, int rotation) {
-        set(part, x, y, rotation, EnumMirror.NO_MIRROR);
-    }
-
-    public void set(@NotNull Part part, int x, int y, int rotation, EnumMirror mirror) {
-        entities.add(part.makePart(x, y, rotation, mirror));
+    public void set(@NotNull Part part, int x, int y, int rotation) {
+        entities.add(part.makePart(x, y, rotation));
     }
 
     public void clear() {

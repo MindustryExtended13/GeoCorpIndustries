@@ -57,16 +57,11 @@ public class Part implements IEntity {
     }
 
     public PartEntity makePart(int x, int y, int rotation) {
-        return makePart(x, y, rotation, NO_MIRROR);
-    }
-
-    public PartEntity makePart(int x, int y, int rotation, EnumMirror mirror) {
         PartEntity entity = prov.get();
         entity.part = this;
         entity.x = x;
         entity.y = y;
         entity.rotation = rotation;
-        entity.mirror = mirror;
         return entity;
     }
 
