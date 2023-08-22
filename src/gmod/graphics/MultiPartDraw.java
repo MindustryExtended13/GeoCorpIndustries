@@ -31,6 +31,11 @@ public class MultiPartDraw extends PartDraw {
     }
 
     @Override
+    public void drawShadow(PartEntity entity) {
+        parts.each(partDraw -> partDraw.drawShadow(entity));
+    }
+
+    @Override
     public void draw(PartEntity entity) {
         parts.each(partDraw -> partDraw.draw(entity));
     }

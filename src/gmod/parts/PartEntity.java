@@ -38,6 +38,10 @@ public class PartEntity implements Position {
     public void update() {
     }
 
+    public void drawShadow() {
+        part.drawer.drawShadow(this);
+    }
+
     public void draw() {
         part.drawer.draw(this);
     }

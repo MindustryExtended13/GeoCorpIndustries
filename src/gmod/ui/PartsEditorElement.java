@@ -135,7 +135,11 @@ public class PartsEditorElement extends Image {
         addListener(new InputListener() {
             @Override
             public boolean scrolled(InputEvent event, float x, float y, float amountX, float amountY) {
-                scale(scale + amountY);
+                if(hasCurrent()) {
+                    current.rotation = (current.rotation + 1) % 4;
+                } else {
+                    scale(scale + amountY);
+                }
                 mouseX = x;
                 mouseY = y;
                 return true;

@@ -11,6 +11,9 @@ public class PartDraw {
         return new Seq<>();
     }
 
+    public void drawShadow(PartEntity entity) {
+    }
+
     public void draw(PartEntity entity) {
     }
 

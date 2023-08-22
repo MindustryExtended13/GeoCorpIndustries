@@ -43,6 +43,7 @@ import mindustry.game.EventType;
 import mindustry.game.Team;
 import mindustry.gen.*;
 import mindustry.graphics.Drawf;
+import mindustry.graphics.Layer;
 import mindustry.graphics.Pal;
 import mindustry.input.InputHandler;
 import mindustry.logic.LAccess;
@@ -56,6 +57,8 @@ import mindustry.world.blocks.ConstructBlock;
 import mindustry.world.blocks.environment.Floor;
 import mindustry.world.blocks.storage.CoreBlock;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.Iterator;
 
 import static mindustry.Vars.*;
 import static mindustry.Vars.net;
@@ -1025,8 +1028,27 @@ public class AbstractUnitEntity extends XeonUnitEntity {
 
     @Override
     public void draw() {
+        if(inFogTo(Vars.player.team())) return;
+
+        boolean isPayload = !isAdded();
+        float z = isPayload ? Draw.z() : elevation > 0.5f ? (type.lowAltitude ?
+                Layer.flyingUnitLow : Layer.flyingUnit) : type.groundLayer +
+                Mathf.clamp(hitSize / 4000f, 0, 0.01f);
+
+        if(controller().isBeingControlled(player.unit())){
+            type.drawControl(this);
+        }
+
+        if(!isPayload && (isFlying() || type.shadowElevation > 0)){
+            Draw.z(Math.min(Layer.darkness, z - 1f));
+            entities.each(PartEntity::drawShadow);
+        }
         entities.each(PartEntity::draw);
         entities.each(PartEntity::drawLight);
+
+        for(StatusEntry e : this.statuses) {
+            e.effect.draw(this, e.time);
+        }
     }
 
     @Override
