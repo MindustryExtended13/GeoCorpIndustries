@@ -3,6 +3,7 @@ package gmod.world.block.units;
 import arc.scene.ui.layout.Table;
 import gmod.GeoCorp;
 import gmod.parts.PartsConstructBuilder;
+import gmod.schematics.ShipSchematic;
 import gmod.ui.PartsEditorDialog;
 import gmod.world.block.GeoBlock;
 import mindustry.gen.Icon;
@@ -24,6 +25,11 @@ public class SpaceShipConstructor extends GeoBlock {
 
     public class SpaceShipConstructorBuild extends GeoBuild {
         public PartsConstructBuilder builder = new PartsConstructBuilder(width, height);
+        public String shipName = "Anonymous star ship";
+
+        public ShipSchematic getSchematic() {
+            return new ShipSchematic(this);
+        }
 
         public boolean isCreative() {
             return creative;
@@ -36,8 +42,10 @@ public class SpaceShipConstructor extends GeoBlock {
             }).size(250, 50).padBottom(3).row();
 
             table.button("Create", Icon.units, () -> {
-                GeoCorp.construct(builder.entities, team, x, y);
-                builder.clear();
+                if(builder.entities.isEmpty()) return;
+                GeoCorp.construct(builder.entities, team, x, y).name = shipName;
+                shipName = "Anonymous star ship";
+                builder.entities.clear();
             }).size(250, 50);
         }
     }

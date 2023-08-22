@@ -68,6 +68,7 @@ public class AbstractUnitEntity extends XeonUnitEntity {
     public boolean hasWeapons, hittable, rotateToBuilding, omniMovement, mineFloor, mineWalls;
     public ObjectSet<StatusEffect> immunities = new ObjectSet<>();
     public int ammoCap, mineTier, itemCapacity, payloadCapacity;
+    public String name;
     public AmmoType ammoType;
 
     {
@@ -191,11 +192,11 @@ public class AbstractUnitEntity extends XeonUnitEntity {
     }
 
     @Override
-    public void display(Table table) {
+    public void display(@NotNull Table table) {
         table.table(t -> {
             t.left();
             t.labelWrap(isPlayer() ? getPlayer().coloredName() +
-                    "\n[lightgray]star ship" : "star ship").left().width(190f).padLeft(5);
+                    "\n[lightgray]" + name : name).left().width(190f).padLeft(5);
         }).growX().left();
         table.row();
 
